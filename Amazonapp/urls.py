@@ -1,0 +1,36 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('about/', views.about, name='about'),
+    path('login/', views.login, name='login'),
+    path('logout/', views.logout_user, name='logout'),
+    path('register/', views.register_user, name='register'),
+    path('admin_login/',views.admin_login,name="admin_login"),
+    path('admin1/',views.admin1,name="admin1"),
+    path('addpro/', views.save_product, name='save_product'),
+    path('delpro/', views.delete_product, name='delete_product'),
+    path('addcat/', views.save_category, name='save_category'),
+    path('updpro/', views.update_product, name='update_product'),
+    path('showpro/', views.show_product, name='show_product'),
+    path('download_product_csv/', views.download_product_csv, name='download_product_csv'),
+    path('download_product_excel/', views.download_product_excel, name='download_product_excel'),
+    path('delcat/', views.delete_category, name='delete_category'),
+    path('showcat/', views.show_category, name='show_category'),
+    path('show_category_csv/', views.show_category_csv, name='show_category_csv'),
+    path('show_category_excel/',views.show_category_excel, name='show_category_excel'), 
+    path('update_password/', views.update_password, name='update_password'),
+    path('update_user/', views.update_user, name='update_user'),
+    path('update_info/', views.update_info, name='update_info'),
+    path('product/<int:pk>', views.product, name='product'),
+    path('category/<str:foo>', views.category, name='category'),
+    path('category_summary/', views.category_summary, name='category_summary'),
+    path('search/', views.search, name='search'),
+    path('submit_rating/', views.submit_rating, name='submit_rating'),
+    path('fpass/',views.fpass,name="fpass"),
+    path('entercode/',views.entercode,name="entercode"),
+    path('resetpass/',views.resetpass,name="resetpass"),
+    path('review_submit/',views.review_submit,name="review_submit"),
+
+]

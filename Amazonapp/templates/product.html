@@ -1,0 +1,223 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="container-fluid">
+  <br />
+
+  <div class="card mb-3">
+    <div class="row g-0">
+      <div class="col-4">
+        <br />
+        <img
+          src="{{ product.image.url }}"
+          class="img-fluid rounded-start"
+          alt="..."
+          style="width: 100%"
+        />
+      </div>
+      <div class="col-md-6">
+        <div class="card-body">
+          <center>
+            <h5 class="card-title"><b>{{ product.name }}</b></h5>
+            <div class="star-rating" data-product-id="{{ product.id }}">
+              <span class="star" data-value="5">&#9733;</span>
+              <span class="star" data-value="4">&#9733;</span>
+              <span class="star" data-value="3">&#9733;</span>
+              <span class="star" data-value="2">&#9733;</span>
+              <span class="star" data-value="1">&#9733;</span>
+            </div>
+            <input
+              type="hidden"
+              name="csrfmiddlewaretoken"
+              value="{{ csrf_token }}"
+            />
+            <hr />
+            <span class="card-price"
+              >Price: <span class="price">${{product.price}}</span></span
+            >
+            <br /><br />
+            <hr />
+            <p class="about">About this item</p>
+            <p class="card-text">{{ product.description|safe }}</p>
+            <div class="star-rating" data-product-id="{{ product.id }}">
+              <span class="star" data-value="5">&#9733;</span>
+              <span class="star" data-value="4">&#9733;</span>
+              <span class="star" data-value="3">&#9733;</span>
+              <span class="star" data-value="2">&#9733;</span>
+              <span class="star" data-value="1">&#9733;</span>
+            </div>
+            <input
+              type="hidden"
+              name="csrfmiddlewaretoken"
+              value="{{ csrf_token }}"
+            />
+            <form  id="review-form" method="post">
+              {% csrf_token %}
+              <div class="form-group">
+                  <textarea name="review_comment" id="review_comment" class="form-control" rows="4" placeholder="Write your review here..."></textarea>
+              </div>
+              
+              <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+          </center>
+        </div>
+      </div>
+      <div class="col-2">
+        <div class="offers">
+          <p>No featured offers available</p>
+        </div>
+        <div class="quantity">
+          <div class="container-fluid">
+            <div class="row justify-content-center quan">
+              <div class="ship">This item cannot be shipped to your selected 
+                delivery location. Please choose a different delivery location.</div>
+                <div class="row justify-content-center mt-5">
+                  <div class="col">Quantity:</div>
+                              <div class="col">
+                              <select class="form-select form-select-sm" id="qty-cart">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                              </select>
+                              </div>
+                          </div>
+            <div class="row d-flex justify-content-center">
+              <button type="button" value="{{ product.id }}" class="btn btn btn-secondary" id="add-cart">Add To Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $(document).ready(function() {
+    $('#review-form').submit(function(e) {
+      e.preventDefault(); // Prevent default form submission behavior
+
+      var formData = $(this).serialize(); // Serialize the form data
+      var url = '{% url "review_submit" %}'; // URL to send the request to
+      $.ajax({
+        type: 'POST',
+        url: url,
+        data: formData,
+        success: function(data) {
+          console.log('Review submitted successfully!');
+          // Optionally, update the UI or show a message to the user
+        },
+        error: function(xhr, errmsg, err) {
+          console.log('Error submitting review111:', errmsg);
+          // Optionally, show an error message to the user
+        }
+      });
+    });
+  });
+  // Check if button pressed
+  $(document).on('click', '#add-cart', function(e) {
+    e.preventDefault();
+    
+    // Get the product ID from the value attribute of the clicked button
+    var productId = $(this).val();
+    
+    // Get the selected product quantity from the dropdown
+    var productQty = $('#qty-cart option:selected').text();
+
+    // Perform the AJAX POST request
+    $.ajax({
+        type: 'POST',
+        url: '{% url 'cart_add' %}',
+        data: {
+            product_id: productId,
+            product_qty: productQty,
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+        },
+        success: function(json) {
+            // Update the cart quantity display
+            document.getElementById("cart_quantity").textContent = json.qty;
+            // Reload the page to reflect changes (optional)
+            location.reload();
+        },
+        error: function(xhr, errmsg, err) {
+            // Log the error to the console
+            console.log('Error occurred:', errmsg);
+        }
+    });
+});
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const stars = document.querySelectorAll(".star");
+    const productId = document
+      .querySelector(".star-rating")
+      .getAttribute("data-product-id");
+
+    stars.forEach((star) => {
+      star.addEventListener("click", function () {
+        const rating = this.getAttribute("data-value");
+        const csrftoken = document.querySelector(
+          "[name=csrfmiddlewaretoken]"
+        ).value;
+
+        console.log("Product ID:", productId);
+        console.log("Rating:", rating);
+        console.log("CSRF Token:", csrftoken);
+
+        fetch("/submit_rating/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          body: JSON.stringify({
+            product_id: productId,
+            rating: rating,
+          }),
+        })
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error("Network response was not ok.");
+          })
+          .then((data) => {
+            console.log("Server response:", data);
+            stars.forEach((star) => star.classList.remove("selected"));
+            for (let i = 0; i < stars.length; i++) {
+              if (i < rating) {
+                stars[i].classList.add("selected");
+              } else {
+                stars[i].classList.remove("selected");
+              }
+            }
+          })
+          .catch((error) => {
+            console.error(
+              "There was a problem with the fetch operation:",
+              error
+            );
+          });
+      });
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const stars = document.querySelectorAll(".star");
+
+    stars.forEach((star) => {
+      star.addEventListener("click", function () {
+        const rating = this.getAttribute("data-rating");
+        document.querySelector('input[name="rating"]').value = rating;
+        stars.forEach((s) => {
+          if (s.getAttribute("data-rating") <= rating) {
+            s.classList.add("gold");
+          } else {
+            s.classList.remove("gold");
+          }
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}

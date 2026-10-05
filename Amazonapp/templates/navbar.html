@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet"> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.css" rel="stylesheet">  
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+    <style>
+    .sidenav {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 30%;
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.5s ease, top 0.5s ease;
+          background-color: #e6e6e6;
+          z-index: 1000;
+      }
+    .sidenav.show {
+          height: 100%; /* Adjust this value according to your content height */
+          top: 0;
+      }
+      .sidenav.hide {
+          top: -500px; /* Adjust this value according to your content height */
+      }
+      #close-button {
+          display: none;
+      }
+      #toggle-button.hidden {
+          display: none;
+      }
+  </style>
+</head>
+<body>
+    <header>
+        <div class="navbar d-flex justify-content-around" id="nav-section">
+            <div class="nav-logo bor  d-flex align-items:center">
+                <div class="logo mt-2" >
+                   <a href="/">
+                    <img src="{% static 'images/logo.png' %}" alt="logo"
+                    style="width:90px">
+                   </a>
+                    
+                </div>
+            </div>
+
+            <div class="nav-address bor">
+                <p class="add-first">Deliver to</p>
+                <div class="add-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <p class="add-second">Pakistan</p>
+                </div>
+            </div>
+
+            <div class="nav-search">
+                <select class="search-select">
+                    <option class="option">All</option>
+                    {% for category in categories %}
+                    <option class="option">{{category.name}}</option>
+                    {% endfor %}
+                </select>
+                <form action="{% url 'search' %}" method="post">
+                    {% csrf_token %}
+                    <div class="sform d-flex">
+                    <input type="text" class="search-input" name="searched" placeholder="Search Amazon">
+                    <div class="search-icon">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                </div>
+                </form>
+            </div>
+
+            <div class="nav-sign bor"><a class="login" href="/login/">
+            <p><span>Hello, sign in</span></p>
+            <p class="nav-second">Account & Lists</p></a>
+            </div>
+            <div class="nav-return bor">
+            <p><span>Returns</span></p>
+            <p class="nav-second">& Orders</p>
+            </div>
+            <div class="nav-cart bor">
+                <a href="{% url 'cart_summary' %}" class="btn btn-outline-dark"><i class="bi-cart-fill me-1"></i>
+                    Cart
+                    <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart_quantity">{{ cart|length }}
+                    </span>
+                </a>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-all" style="position:absolute; left:30px">
+                <a href="/update_info/">Update Profile</a>
+            </div>
+        </div>
+    </header>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"></script>
+
+    <script>
+      document.getElementById('toggle-button').addEventListener('click', function() {
+        var sidenav = document.getElementById('sidenav-1');
+        var toggleButton = document.getElementById('toggle-button');
+        var closeButton = document.getElementById('close-button');
+        
+        sidenav.classList.toggle('show');
+        toggleButton.classList.add('hidden');
+        closeButton.style.display = 'inline-block';
+      });
+  
+      document.getElementById('close-button').addEventListener('click', function() {
+        var sidenav = document.getElementById('sidenav-1');
+        var toggleButton = document.getElementById('toggle-button');
+        
+        sidenav.classList.remove('show');
+        this.style.display = 'none';
+        toggleButton.classList.remove('hidden');
+      });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('.search-input').on('input', function() {
+                var query = $(this).val();
+
+                $.ajax({
+                    url: "{% url 'search' %}",
+                    type: 'GET',
+                    data: {
+                        'q': query
+                    },
+                    success: function(response) {
+                        // Handle the response here
+                        console.log(response);
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle any errors here
+                        console.error(xhr, status, error);
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  </body>
+</body>
+</html>

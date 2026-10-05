@@ -1,0 +1,129 @@
+{% extends 'base.html' %} {% block content %}
+
+<section class="py-5">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-2">
+        <div class="sidebar">
+          <ul>
+            <li><p>Popular Shopping Ideas</p></li>
+            <li>
+              <a href="http://127.0.0.1:8000/category/Gaming%20Accessories"
+                >Gaming Accessories</a
+              >
+            </li>
+            <li><a href="http://127.0.0.1:8000/category/PC">PC</a></li>
+            <li><a href="http://127.0.0.1:8000/category/Phones">Phones</a></li>
+            <li>
+              <a href="http://127.0.0.1:8000/category/Gadgets">Gadgets</a>
+            </li>
+          </ul>
+          <hr />
+        </div>
+      </div>
+      <div class="col-10">
+        <div class="content">
+          <ul class="thing-list">
+            {% for item in products_with_ratings %}
+            <li class="thing">
+              <picture class="image">
+                <img src="{{ item.product.image.url }}" />
+              </picture>
+
+              <div class="info">
+                <a href="{% url 'product' item.product.id %}" class="title"
+                  >{{item.product.name }}</a
+                >
+                <div class="rating">
+                  {% for star in item.stars %} {% if star == 'filled' %}
+                  <span class="star filled">★</span>
+                  {% else %}
+                  <span class="star">☆</span>
+                  {% endif %} {% endfor %}
+                </div>
+                <div class="price">
+                  <p><sup>$</sup>{{item.product.price}}</p>
+                </div>
+                <div class="save">
+                  <p>Buy 2, save 5%</p>
+                </div>
+                <button type="button" value="{{ item.product.id }}" class="btn btn-secondary add-cart-button"
+    style="background-color: #f39c12; border-radius: 30px; border: none; font-size: 12px; color: black;"
+    onmouseover="this.style.backgroundColor='#c7821a'; this.style.color='black';"
+    onmouseout="this.style.backgroundColor='#f39c12'; this.style.color='black';">
+    Add To Cart
+</button>
+
+
+              </div>
+              {% endfor %}
+            </li> 
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+  $(document).ready(function() {
+    // Setup CSRF token for AJAX requests
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    var csrftoken = getCookie('csrftoken');
+  
+    function csrfSafeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+  
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+  
+    // Check if button pressed
+    $(document).on('click', '.add-cart-button', function(e) {
+        e.preventDefault();
+        
+        var productId = $(this).val(); // Get the product ID from the button value
+        
+        console.log('Product ID:', productId); // Debugging log
+  
+        $.ajax({
+            type: 'POST',
+            url: '{% url "cart_add" %}',
+            data: {
+                product_id: productId,
+                product_qty: 1, // Set the quantity to 1
+                csrfmiddlewaretoken: csrftoken,
+                action: 'post'
+            },
+            success: function(json) {
+                console.log('Success:', json); // Debugging log
+                document.getElementById("cart_quantity").textContent = json.qty;
+                location.reload();
+            },
+            error: function(xhr, errmsg, err) {
+                console.log('Error occurred:', errmsg); // Debugging log
+            }
+        });
+    });
+  });
+  
+</script>
+{% endblock %}
